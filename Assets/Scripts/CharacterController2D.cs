@@ -11,6 +11,14 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerInput))]
 public class CharacterController2D : MonoBehaviour
 {
+    [Header("Hair Offsets (Assume facing right)")]
+    [SerializeField] private Vector2 idleOffset = new Vector2(-0.01f, -0.1f);
+    [SerializeField] private Vector2 runOffset = new Vector2(-0.1f, -0.01f);
+    [SerializeField] private Vector2 jumpOffset = new Vector2(-0.01f, -0.1f);
+    [SerializeField] private Vector2 fallOffset = new Vector2(-0.01f, 0.1f);
+
+    [Header("Hair Anchor")]
+    [SerializeField] private HairAnchor hairAnchor;
 
     [Header("Movement Params")]
     public float runSpeed = 6.0f;
@@ -76,8 +84,44 @@ public class CharacterController2D : MonoBehaviour
 
         UpdateFacingDirection();
 
+        UpdateHairOffset();
+
         UpdateAnimator();
 
+    }
+
+    private void UpdateHairOffset() 
+    {
+        Vector2 currentOffset = Vector2.zero;
+
+        // idle
+        if (rb.velocity.x == 0 && rb.velocity.y == 0)
+        {
+            currentOffset = idleOffset;
+        }
+        // jump
+        else if (rb.velocity.y > 0)
+        {
+            currentOffset = jumpOffset;
+        }
+        // fall
+        else if (rb.velocity.y < 0) 
+        {
+            currentOffset = fallOffset;
+        }
+        // run
+        else if (rb.velocity.x != 0)
+        {
+            currentOffset = runOffset;
+        }
+
+        // flip x offset direction if we're facing left
+        if (!facingRight)
+        {
+            currentOffset.x = currentOffset.x * -1;
+        }
+
+        hairAnchor.partOffset = currentOffset;
     }
 
     private void UpdateIsGrounded()
